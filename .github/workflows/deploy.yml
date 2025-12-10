@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repo
@@ -19,17 +22,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Lowercase owner/repo
-        run: echo "LOWER_REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Extract short commit SHA
-        run: echo "SHORT_SHA=${GITHUB_SHA::4}" >> $GITHUB_ENV
+      - name: Extract lowercase repo + user + short SHA
+        id: vars
+        run: |
+          echo "LOWER_USER=$(echo '${{ github.actor }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "LOWER_REPO=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]' | cut -d'/' -f2)" >> $GITHUB_ENV
+          echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-4)" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.actor }}/re-collection:${SHORT_SHA} .
+          docker build -t ghcr.io/${LOWER_USER}/${LOWER_REPO}:recollection-${SHORT_SHA} .
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.actor }}/re-collection:${SHORT_SHA}
-
+          docker push ghcr.io/${LOWER_USER}/${LOWER_REPO}:recollection-${SHORT_SHA}

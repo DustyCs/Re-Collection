@@ -27,8 +27,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${LOWER_REPO}:recollection-${SHORT_SHA} .
+          docker build -t ghcr.io/${{ github.actor }}/re-collection:${SHORT_SHA} .
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${LOWER_REPO}:recollection-${SHORT_SHA}
+          docker push ghcr.io/${{ github.actor }}/re-collection:${SHORT_SHA}
+
